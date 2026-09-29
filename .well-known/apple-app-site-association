@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "F3933R6J9S.com.ipmma.calc.ThingsHub",
+        "appIDs": ["F3933R6J9S.com.ipmma.calc.ThingsHub"],
+        "paths": ["/guide/*"],
+        "components": [
+          { "/": "/guide/*", "comment": "One guide: https://portthings.com/guide/<id>" }
+        ]
+      }
+    ]
+  }
+}

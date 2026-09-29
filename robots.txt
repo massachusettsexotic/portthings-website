@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://portthings.com/sitemap.xml

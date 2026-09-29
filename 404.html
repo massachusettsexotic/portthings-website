@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not found | Port Things</title>
+<meta name="description" content="This page isn&#x27;t here.">
+<link rel="canonical" href="https://portthings.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Port Things">
+<meta property="og:title" content="Not found | Port Things">
+<meta property="og:description" content="This page isn&#x27;t here.">
+<meta property="og:url" content="https://portthings.com/">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+  <h1>That page isn't here.</h1>
+  <p>It may be a guide that isn't out yet. <a href="/">See every Port Things guide</a>.</p>
+
+  <footer>© 2026 Incmplte L.L.C. · <a href="https://incmpltellc.com/">Privacy</a> ·
+  <a href="https://incmpltellc.com/#support">Support</a></footer>
+</main>
+<script>
+fetch('/app-store.json').then(function(r){return r.json()}).then(function(j){
+  var id=(j.PortThings||'').trim(); if(!id) return;
+  document.querySelectorAll('span.badge[data-app="PortThings"]').forEach(function(b){
+    var a=document.createElement('a');a.className='store';a.href='https://apps.apple.com/app/id'+id;
+    a.textContent='Get Port Things on the App Store';b.replaceWith(a);});
+}).catch(function(){});
+</script>
+</body>
+</html>
