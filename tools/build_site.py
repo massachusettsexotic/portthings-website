@@ -236,7 +236,7 @@ def render_home(guides, regions, sid):
 
   <h2>How it works</h2>
   <ul class="buy">
-    <li>The app comes with <b>one guide included</b>: pick any destination.</li>
+    <li>The app comes with <b>two guides included</b>: pick any two destinations.</li>
     <li>Add other guides one at a time,</li>
     <li>or a <b>cruise-region pack</b> that covers every port in that part of the world,</li>
     <li>or <b>All guides</b>, including every guide added later.</li>
@@ -245,7 +245,7 @@ def render_home(guides, regions, sid):
 
   <h2 id="cruise-planner">Which cruise are you taking?</h2>
   <p>Tick the ports on your itinerary and the app works out the cheapest way to cover them: a region pack,
-  single guides, your included guide, or a mix. It leaves out anything you already own and shows any extra
+  single guides, your included guides, or a mix. It leaves out anything you already own and shows any extra
   ports a pack unlocks.</p>
   <p>The cruise-region packs:</p>
   <ul class="packs">
@@ -328,7 +328,7 @@ def render_guide(g, sid):
   <div class="cta">
     <div>
       <h2>Get the {E(g['name'])} guide</h2>
-      <p>{APP_NAME} comes with one guide included, so this can be your first.</p>
+      <p>{APP_NAME} comes with two guides included, so this can be one of them.</p>
       {packs}
       <p>{badge(sid)}</p>
     </div>

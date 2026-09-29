@@ -4,7 +4,7 @@ The website for **Port Things**, the one iOS app that holds every Things destina
 (source: `~/ThingsHub`). Static HTML/CSS on GitHub Pages, same setup as tulumthings.com.
 
 **Port Things is not on the App Store yet.** Every page says "Coming soon to the App Store".
-No store badge and no prices. The planned prices ($4.99 app with one guide included, $4.99 per
+No store badge and no prices. The planned prices ($4.99 app with two guides included, $4.99 per
 guide, about $9.99 per cruise-region pack, about $19.99 for All guides) live in App Store Connect
 and can change, so they stay off the site.
 
