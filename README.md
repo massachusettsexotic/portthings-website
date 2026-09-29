@@ -38,9 +38,9 @@ The app claims `applinks:portthings.com` and opens `https://portthings.com/guide
 (and `/?guide=<id>`, which the home page forwards to `/guide/<id>/` in a browser).
 `/.well-known/apple-app-site-association` lists appID `F3933R6J9S.com.ipmma.calc.ThingsHub`,
 paths `/guide/*`. `.nojekyll` is required, or Jekyll drops the `.well-known` folder.
-GitHub Pages serves the file (no extension) as `application/octet-stream`. Apple's CDN has
-accepted that since iOS 9.3 (the file must be unsigned JSON, reachable over HTTPS with no
-redirects), so it works once HTTPS is on. Check with:
+GitHub Pages serves the file (no extension) as `application/octet-stream`, over HTTPS with
+no redirect. Apple's CDN accepts that: verified 29 Sep 2026, `app-site-association.cdn-apple.com`
+returned the file verbatim. Check with:
 
     curl -sI https://portthings.com/.well-known/apple-app-site-association
     curl -s https://app-site-association.cdn-apple.com/a/v1/portthings.com
@@ -50,9 +50,6 @@ redirects), so it works once HTTPS is on. Check with:
 - **Privacy page.** There is no Port Things privacy page yet. The footer links to
   https://incmpltellc.com/. Add `incmpltellc.com/portthings/privacy.html` (canonical, for App
   Store Connect) and point the footer at it.
-- **HTTPS.** After Dan's DNS is in and GitHub's certificate state is `approved`:
-  `gh api -X PUT repos/massachusettsexotic/portthings-website/pages -F https_enforced=true`.
-  At most one custom-domain re-add per hour (see memory feedback_github_pages_custom_domain_wait).
 - **Port Things app icon.** None exists yet (Dan's art). When it lands, use it as the favicon
   and in the guide-page "Get the guide" box.
 
@@ -71,9 +68,10 @@ so the two sites never carry duplicate content. On launch day:
 4. Point the tulumthings.com app pages for guides now inside Port Things at `/guide/<id>/` here.
 5. Privacy pages stay on incmpltellc.com (canonical, in the App Store metadata).
 
-## DNS (Dan, at GoDaddy)
+## DNS (Dan, at GoDaddy) and HTTPS
 
-Same five records as passthecore.com and tulumthings.com: four `A @` →
+Done by 29 Sep 2026: GitHub's Let's Encrypt certificate was already `approved` when Pages was
+enabled, and HTTPS is enforced. The records are the same five as passthecore.com and tulumthings.com: four `A @` →
 185.199.108.153 / 185.199.109.153 / 185.199.110.153 / 185.199.111.153, `CNAME www` →
 `massachusettsexotic.github.io`, and delete GoDaddy's "WebsiteBuilder Site" parking A record.
 Leave NS/SOA and any MX/TXT alone.
