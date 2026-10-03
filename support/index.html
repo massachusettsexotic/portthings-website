@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support | Port Things</title>
+<meta name="description" content="Help with Port Things: included guides, restoring purchases, offline use, refunds and contact.">
+<link rel="canonical" href="https://portthings.com/support/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Port Things">
+<meta property="og:title" content="Support | Port Things">
+<meta property="og:description" content="Help with Port Things: included guides, restoring purchases, offline use, refunds and contact.">
+<meta property="og:url" content="https://portthings.com/support/">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+  <p class="kicker"><a href="/">Port Things</a></p>
+  <h1>Support</h1>
+  <p class="tagline">Questions, a problem, or a place we got wrong? Email <a href="mailto:info@incmpltellc.com?subject=Port%20Things">info@incmpltellc.com</a> and a real person will answer.</p>
+  <h3>How do I pick my included guides?</h3>
+  <p>The app comes with five guides of your choice. Tap any destination on Home, then <b>Make this one of my included guides</b>. The banner on Home counts how many picks you have left.</p>
+  <h3>I got a new phone or reinstalled the app.</h3>
+  <p>Sign in with the same Apple ID. Your included picks come back from your own iCloud, and anything you bought comes back with <b>Settings &rarr; Restore Purchases</b> in the app.</p>
+  <h3>Does it really work without a signal?</h3>
+  <p>Yes. Every place, description, opening time and day plan is stored on your phone, so a guide works at sea and at the pier with no Wi-Fi or roaming. Photos for a guide download the first time you open it on Wi-Fi, and the map background needs a connection.</p>
+  <h3>What does it cost?</h3>
+  <p>The app is a one-time purchase with five guides included. After that you can add single guides, or get <b>All guides</b>, which also includes every destination we add later. No subscriptions, no ads, no account.</p>
+  <h3>Does Family Sharing work?</h3>
+  <p>Yes. The app and its in-app purchases support Family Sharing.</p>
+  <h3>I'd like a refund.</h3>
+  <p>Apple handles all payments and refunds. Go to <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>, sign in, and choose the purchase.</p>
+  <h3>A place has closed or something is wrong in a guide.</h3>
+  <p>Please tell us: email <a href="mailto:info@incmpltellc.com?subject=Port%20Things">info@incmpltellc.com</a> with the guide and the place's name. We fix guides in app updates.</p>
+  <p class="small"><a href="https://incmpltellc.com/portthings/privacy.html">Privacy policy</a>: Port Things collects no data.</p>
+
+  <footer>© 2026 Incmplte L.L.C. · <a href="https://incmpltellc.com/">Privacy</a> ·
+  <a href="/support/">Support</a></footer>
+</main>
+<script>
+fetch('/app-store.json').then(function(r){return r.json()}).then(function(j){
+  var id=(j.PortThings||'').trim(); if(!id) return;
+  document.querySelectorAll('span.badge[data-app="PortThings"]').forEach(function(b){
+    var a=document.createElement('a');a.className='store';a.href='https://apps.apple.com/app/id'+id;
+    a.textContent='Get Port Things on the App Store';b.replaceWith(a);});
+}).catch(function(){});
+</script>
+</body>
+</html>

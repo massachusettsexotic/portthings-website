@@ -30,6 +30,9 @@ HUB = os.path.join(HOME, "ThingsHub", "ThingsHub")
 SITE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = "https://portthings.com"
 APP_NAME = "Port Things"
+WORD = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
+INCLUDED = 5   # set from catalog.json includedGuides in build_model()
+SUPPORT_EMAIL = "info@incmpltellc.com"
 COVER_PX = 360          # 1024 source -> 360 (tiles are <= 180 CSS px wide at 2x)
 E = html.escape
 
@@ -109,7 +112,7 @@ def head(title, desc, url, image=None, extra=""):
 
 FOOT = f"""
   <footer>© {date.today().year} Incmplte L.L.C. · <a href="https://incmpltellc.com/">Privacy</a> ·
-  <a href="https://incmpltellc.com/#support">Support</a></footer>
+  <a href="/support/">Support</a></footer>
 </main>
 {STORE_JS}
 </body>
@@ -126,7 +129,9 @@ def art(g, cls="cover"):
 
 # ------------------------------------------------------------------------------------------ model
 def build_model():
+    global INCLUDED
     cat = load(os.path.join(HUB, "Catalog", "catalog.json"))
+    INCLUDED = cat.get("includedGuides", 5)
     man = load(os.path.join(HUB, "Packs", "manifest.json"))
     guides = []
     for c in cat["guides"]:
@@ -167,7 +172,7 @@ def build_model():
             source=man[gid]["source"]))
     by = {g["id"]: g for g in guides}
     regions = []
-    for r in cat["regions"]:
+    for r in (cat["regions"] if cat.get("sellRegionPacks", True) else []):
         live = [by[i] for i in r["guides"] if i in by]
         if live:
             regions.append(dict(id=r["id"], name=r["name"], guides=live))
@@ -197,6 +202,8 @@ def card(g):
 
 def render_home(guides, regions, sid):
     n = len(guides)
+    inc = WORD.get(INCLUDED, str(INCLUDED))
+    pack_li = ("\n    <li>or a <b>cruise-region pack</b> that covers every port in that part of the world,</li>" if regions else "")
     shelves = []
     for sh in ("cruise", "trips"):
         gs = [g for g in guides if sh in g["shelves"]]
@@ -211,6 +218,16 @@ def render_home(guides, regions, sid):
     packs = "\n".join(
         f'    <li><b>{E(r["name"])}</b><br><span>{E(", ".join(g["name"] for g in r["guides"]))}</span></li>'
         for r in regions)
+    planner = (f"""  <p>Tick the ports on your itinerary and the app works out the cheapest way to cover them: a region pack,
+  single guides, your included guides, or a mix. It leaves out anything you already own and shows any extra
+  ports a pack unlocks.</p>
+  <p>The cruise-region packs:</p>
+  <ul class="packs">
+{packs}
+  </ul>
+  <p class="small">Trips guides aren't in the region packs. Get them on their own or with All guides.</p>""" if regions else
+               """  <p>Tick the ports on your itinerary and the app shows the cheapest way to cover them: your included
+  guides first, then single guides or All guides. It leaves out anything you already own.</p>""")
     desc = (f"Port Things is one iOS app that holds {n} deep, offline travel guides to cruise ports and "
             "trips. Pick the ports on your cruise. Coming soon to the App Store.")
     return head(f"{APP_NAME}: offline cruise port and travel guides", desc, BASE + "/", extra="""
@@ -236,22 +253,14 @@ def render_home(guides, regions, sid):
 
   <h2>How it works</h2>
   <ul class="buy">
-    <li>The app comes with <b>two guides included</b>: pick any two destinations.</li>
-    <li>Add other guides one at a time,</li>
-    <li>or a <b>cruise-region pack</b> that covers every port in that part of the world,</li>
-    <li>or <b>All guides</b>, including every guide added later.</li>
+    <li>The app comes with <b>{inc} guides included</b>: pick any {inc} destinations.</li>
+    <li>Add other guides one at a time,</li>{pack_li}
+    <li>or <b>All guides</b>, including every guide we add later.</li>
   </ul>
 {''.join(shelves)}
 
   <h2 id="cruise-planner">Which cruise are you taking?</h2>
-  <p>Tick the ports on your itinerary and the app works out the cheapest way to cover them: a region pack,
-  single guides, your included guides, or a mix. It leaves out anything you already own and shows any extra
-  ports a pack unlocks.</p>
-  <p>The cruise-region packs:</p>
-  <ul class="packs">
-{packs}
-  </ul>
-  <p class="small">Trips guides aren't in the region packs. Get them on their own or with All guides.</p>
+{planner}
 {FOOT}"""
 
 
@@ -328,11 +337,46 @@ def render_guide(g, sid):
   <div class="cta">
     <div>
       <h2>Get the {E(g['name'])} guide</h2>
-      <p>{APP_NAME} comes with two guides included, so this can be one of them.</p>
+      <p>{APP_NAME} comes with {WORD.get(INCLUDED, INCLUDED)} guides included, so this can be one of them.</p>
       {packs}
       <p>{badge(sid)}</p>
     </div>
   </div>
+{FOOT}"""
+
+
+def render_support():
+    inc = WORD.get(INCLUDED, str(INCLUDED))
+    mail = f'<a href="mailto:{SUPPORT_EMAIL}?subject=Port%20Things">{SUPPORT_EMAIL}</a>'
+    qa = [
+        ("How do I pick my included guides?",
+         f"The app comes with {inc} guides of your choice. Tap any destination on Home, then "
+         "<b>Make this one of my included guides</b>. The banner on Home counts how many picks you have left."),
+        ("I got a new phone or reinstalled the app.",
+         "Sign in with the same Apple ID. Your included picks come back from your own iCloud, and anything you bought "
+         "comes back with <b>Settings &rarr; Restore Purchases</b> in the app."),
+        ("Does it really work without a signal?",
+         "Yes. Every place, description, opening time and day plan is stored on your phone, so a guide works at sea and "
+         "at the pier with no Wi-Fi or roaming. Photos for a guide download the first time you open it on Wi-Fi, and the "
+         "map background needs a connection."),
+        ("What does it cost?",
+         f"The app is a one-time purchase with {inc} guides included. After that you can add single guides, or get "
+         "<b>All guides</b>, which also includes every destination we add later. No subscriptions, no ads, no account."),
+        ("Does Family Sharing work?",
+         "Yes. The app and its in-app purchases support Family Sharing."),
+        ("I'd like a refund.",
+         'Apple handles all payments and refunds. Go to <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>, '
+         "sign in, and choose the purchase."),
+        ("A place has closed or something is wrong in a guide.",
+         f"Please tell us: email {mail} with the guide and the place's name. We fix guides in app updates."),
+    ]
+    items = "\n".join(f"  <h3>{q}</h3>\n  <p>{a}</p>" for q, a in qa)
+    return head(f"Support | {APP_NAME}", f"Help with {APP_NAME}: included guides, restoring purchases, offline use, refunds and contact.",
+                BASE + "/support/") + f"""  <p class="kicker"><a href="/">{APP_NAME}</a></p>
+  <h1>Support</h1>
+  <p class="tagline">Questions, a problem, or a place we got wrong? Email {mail} and a real person will answer.</p>
+{items}
+  <p class="small"><a href="https://incmpltellc.com/portthings/privacy.html">Privacy policy</a>: {APP_NAME} collects no data.</p>
 {FOOT}"""
 
 
@@ -351,8 +395,9 @@ def main():
     for g in guides:
         wr(f"guide/{g['id']}/index.html", render_guide(g, sid))
     wr("404.html", render_404())
+    wr("support/index.html", render_support())
     today = date.today().isoformat()
-    urls = [BASE + "/"] + [f"{BASE}/guide/{g['id']}/" for g in guides]
+    urls = [BASE + "/", BASE + "/support/"] + [f"{BASE}/guide/{g['id']}/" for g in guides]
     wr("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
        + "".join(f"  <url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
