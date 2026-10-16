@@ -96,6 +96,7 @@ img { max-width: 100%; }
 
 footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); margin-top: 56px; padding-top: 20px; }
 footer a { color: var(--muted); }
+footer .credits { font-size: .78rem; line-height: 1.5; margin: 10px 0 0; max-width: 70ch; }
 
 @media (max-width: 480px) {
   main { padding: 28px 16px 64px; }
