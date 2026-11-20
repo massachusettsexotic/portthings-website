@@ -76,6 +76,10 @@ def badge(sid):
     return '<span class="badge" data-app="PortThings">Coming soon to the App Store</span>'
 
 
+def avail_line():
+    return "On the App Store now." if store_id() else "Coming soon to the App Store."
+
+
 # Swaps the badge for the store link as soon as app-store.json carries an ID (same as tulumthings.com).
 STORE_JS = """<script>
 fetch('/app-store.json').then(function(r){return r.json()}).then(function(j){
@@ -234,7 +238,7 @@ def render_home(guides, regions, sid):
                """  <p>Tick the ports on your itinerary and the app shows the cheapest way to cover them: your included
   guides first, then single guides or All guides. It leaves out anything you already own.</p>""")
     desc = (f"Port Things is one iOS app that holds {n} deep, offline travel guides to cruise ports and "
-            "trips. Pick the ports on your cruise. Coming soon to the App Store.")
+            "trips. Pick the ports on your cruise. " + avail_line())
     return head(f"{APP_NAME}: offline cruise port and travel guides", desc, BASE + "/", extra="""
 <script>
 // The app's own links also use https://portthings.com/?guide=<id>; send browsers to that guide's page.
@@ -243,7 +247,7 @@ def render_home(guides, regions, sid):
   <h1>Deep, offline guides to every port. Pick the ones on your cruise.</h1>
   <p class="tagline">One iOS app, {n} destinations. Real places, ready-made port days that get you back
   before all-aboard, and a guide that keeps working with no signal.</p>
-  <p><span class="badge" data-app="PortThings">Coming soon to the App Store</span></p>
+  <p>{badge(store_id())}</p>
 
   <ul class="points">
     <li><b>Deep, not wide</b>Thousands of real places per destination, with opening hours, descriptions and the
@@ -281,7 +285,7 @@ def render_guide(g, sid):
     kind = "cruise port guide" if is_cruise else "travel guide"
     desc = (f"The {g['name']} {kind} in Port Things: {num(g['places'])} places, {g['days']} ready-made days"
             + (f", {g['piers']} cruise pier{'s' if g['piers'] != 1 else ''}" if g["piers"] else "")
-            + f", {len(langs)} languages, works offline. Coming soon to the App Store.")
+            + f", {len(langs)} languages, works offline. " + avail_line())
     image = f"{BASE}/covers/{g['id']}.png" if g["hasCover"] else None
 
     piers = ""
