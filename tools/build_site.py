@@ -52,6 +52,39 @@ def load(p):
         return json.load(f)
 
 
+# Screenshot gallery on the home page (Dan 23 Nov 2026: "lots of screenshots, including directions").
+# Sources = the app's UI-test captures in ~/Screenshots/ThingsHub (iPhone 17 Pro Max), read-only;
+# copied to shots/ and resized. NO prices on the site, so the store sheet and planner shots stay out.
+SHOT_SRC = os.path.join(HOME, "Screenshots", "ThingsHub")
+SHOT_PX = 1100          # long edge; shown <= ~260 CSS px wide
+SHOTS = [
+    ("08-home-trips-shelf", "home", "Every port, grouped by region"),
+    ("04-owned-guide-explore", "explore", "Traveler guides and ready-made port days"),
+    ("10-day-plan", "day-plan", "Port days timed around all-aboard"),
+    ("11-traveler-guide", "arrival", "Arrival day: your pier, taxis, money"),
+    ("12-place", "place", "Walking minutes from your pier"),
+    ("05-owned-guide-map", "map", "Every place on the map"),
+    ("06b-apple-maps-howto", "directions", "Offline directions: save your port in Apple Maps"),
+    ("07-offline-apple-maps-buttons", "offline", "Offline packs for every part of the port"),
+    ("06-owned-stthomas", "st-thomas", "One app, every port: St. Thomas"),
+]
+
+
+def shots():
+    os.makedirs(os.path.join(SITE, "shots"), exist_ok=True)
+    out = []
+    for src, name, caption in SHOTS:
+        f = os.path.join(SHOT_SRC, f"{src}-iPhone17ProMax.png")
+        if not os.path.exists(f):
+            continue
+        dst = os.path.join(SITE, "shots", f"{name}.jpg")
+        if not (os.path.exists(dst) and os.path.getmtime(dst) >= os.path.getmtime(f)):
+            subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "82", "-Z", str(SHOT_PX), f,
+                            "--out", dst], check=True, capture_output=True)
+        out.append((name, caption))
+    return out
+
+
 def wr(rel, s):
     p = os.path.join(SITE, rel)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -275,13 +308,24 @@ def render_home(guides, regions, sid):
   before all-aboard, and a guide that keeps working with no signal.</p>
   <p>{badge(store_id())}</p>
 
+  <ul class="promise">
+    <li><span class="big">No subscription. Ever.</span>Buy it once. Add a guide only if you want one.</li>
+    <li><span class="big">Offline maps</span>Every place, day plan and walking time is on your phone. No signal needed.</li>
+    <li><span class="big">Offline directions</span>Save your port in Apple Maps with one tap and directions work at sea, with no roaming.</li>
+  </ul>
+
+  <h2 id="screens">See it</h2>
+  <div class="shots">
+{chr(10).join(f'    <figure><img src="/shots/{n}.jpg" alt="{E(c)}" loading="lazy" width="250"><figcaption>{E(c)}</figcaption></figure>' for n, c in SHOTS_BUILT)}
+  </div>
+
   <ul class="points">
     <li><b>Deep, not wide</b>Thousands of real places per destination, with opening hours, descriptions and the
     area each one is in. Hand-picked highlights on top.</li>
     <li><b>Built for the port day</b>Walking minutes from your pier, day plans timed around the ship and an
     all-aboard reminder.</li>
-    <li><b>Works offline</b>Every place, description and day plan is on the phone. Only the map background
-    needs a signal.</li>
+    <li><b>Works offline</b>Every place, description and day plan is on the phone. Save the port in Apple Maps
+    once and the map and directions work with no signal too.</li>
     <li><b>One app, your ports</b>No subscription, no account, no ads, no tracking. Most guides in eleven
     languages.</li>
   </ul>
@@ -426,6 +470,8 @@ def main():
     sid = store_id()
     guides, regions = build_model()
     covers(guides)
+    global SHOTS_BUILT
+    SHOTS_BUILT = shots()
     wr("index.html", render_home(guides, regions, sid))
     for g in guides:
         wr(f"guide/{g['id']}/index.html", render_guide(g, sid))
