@@ -447,7 +447,7 @@ def render_guide(g, sid):
   <h2>Languages</h2>
   <p>{E(", ".join(langs))}.</p>
 
-  <div class="cta">
+{port_section(g)}  <div class="cta">
     <div>
       <h2>Get the {E(g['name'])} guide</h2>
       <p>{APP_NAME} comes with {WORD.get(INCLUDED, INCLUDED)} guides included, so this can be one of them.</p>
@@ -456,6 +456,20 @@ def render_guide(g, sid):
     </div>
   </div>
 {FOOT}"""
+
+
+# Port pages per guide, filled by tools/build_port_pages.py before the guide pages render.
+PORT_HUBS = {}
+
+
+def port_section(g):
+    pages = PORT_HUBS.get(g["id"])
+    if not pages:
+        return ""
+    items = "\n".join(f'    <li><a href="/guide/{g["id"]}/ports/{slug}/">{E(title)}</a></li>' for slug, title in pages)
+    return (f'  <h2>Port pages</h2>\n  <p class="small">Where ships dock, what is within walking distance of the pier, '
+            f'and the ready-made port days, one page per port.</p>\n  <ul>\n{items}\n  </ul>\n'
+            f'  <p><a href="/guide/{g["id"]}/ports/">All {E(g["name"])} port pages</a></p>\n\n')
 
 
 def render_support():
@@ -540,6 +554,11 @@ def main():
     global SHOTS_BUILT
     SHOTS_BUILT = shots()
     wr("index.html", render_home(guides, regions, sid))
+    # Cruise-port pages (moved from tulumthings.com, 23 Nov 2026) before the guide pages link to them.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import build_port_pages
+    port_urls, hubs, _moves = build_port_pages.build({g["id"] for g in guides}, check)
+    PORT_HUBS.clear(); PORT_HUBS.update(hubs)
     for g in guides:
         wr(f"guide/{g['id']}/index.html", render_guide(g, sid))
     wr("404.html", render_404())
@@ -547,7 +566,7 @@ def main():
     wr("app/index.html", render_app_redirect())
     qr_codes()
     today = date.today().isoformat()
-    urls = [BASE + "/", BASE + "/support/"] + [f"{BASE}/guide/{g['id']}/" for g in guides]
+    urls = [BASE + "/", BASE + "/support/"] + [f"{BASE}/guide/{g['id']}/" for g in guides] + sorted(port_urls)
     wr("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
        + "".join(f"  <url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
