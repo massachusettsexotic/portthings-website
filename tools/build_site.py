@@ -107,9 +107,25 @@ def store_id():
         return ""
 
 
-def badge(sid):
+def provider_token():
+    """App Store Connect > Analytics > Campaigns provider token (Dan pastes it into app-store.json as
+    "PortThingsProviderToken"). With it, every store link carries pt/ct and ASC counts downloads per source."""
+    try:
+        return str(load(os.path.join(SITE, "app-store.json")).get("PortThingsProviderToken", "")).strip()
+    except FileNotFoundError:
+        return ""
+
+
+def store_url(ct):
+    """App Store link for one traffic source (ct = campaign: web, web-guide, qr)."""
+    sid, pt = store_id(), provider_token()
+    url = f"https://apps.apple.com/app/id{sid}"
+    return url + (f"?pt={pt}&ct={ct}&mt=8" if pt else "")
+
+
+def badge(sid, ct="web"):
     if sid:
-        return f'<a class="store" href="https://apps.apple.com/app/id{E(sid)}">Get {APP_NAME} on the App Store</a>'
+        return f'<a class="store" href="{E(store_url(ct))}">Get {APP_NAME} on the App Store</a>'
     return '<span class="badge" data-app="PortThings">Coming soon to the App Store</span>'
 
 
@@ -130,6 +146,11 @@ fetch('/app-store.json').then(function(r){return r.json()}).then(function(j){
 
 def head(title, desc, url, image=None, extra=""):
     og_img = f'\n<meta property="og:image" content="{E(image)}">' if image else ""
+    # Smart App Banner (Safari on iPhone): "Open" / "View" bar at the top. app-argument = this page's URL,
+    # which the app's universal links (/guide/*) turn into opening that guide.
+    sid = store_id()
+    if sid:
+        og_img += f'\n<meta name="apple-itunes-app" content="app-id={E(sid)}, app-argument={E(url)}">'
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -315,6 +336,8 @@ def render_home(guides, regions, sid):
   <p class="tagline">One iOS app, {n} destinations. Real places, ready-made port days that get you back
   before all-aboard, and a guide that keeps working with no signal.</p>
   <p>{badge(store_id())}</p>
+  <p class="qrbox"><img src="/qr/portthings-app.png" alt="QR code: Port Things on the App Store" width="120" height="120">
+  <span><b>On a computer?</b> Point your iPhone camera here to get {APP_NAME}.</span></p>
 
   <ul class="promise">
     <li><span class="big">No subscription. Ever.</span>Buy it once. Add a guide only if you want one.</li>
@@ -428,7 +451,7 @@ def render_guide(g, sid):
       <h2>Get the {E(g['name'])} guide</h2>
       <p>{APP_NAME} comes with {WORD.get(INCLUDED, INCLUDED)} guides included, so this can be one of them.</p>
       {packs}
-      <p>{badge(sid)}</p>
+      <p>{badge(sid, "web-guide")}</p>
     </div>
   </div>
 {FOOT}"""
@@ -469,6 +492,39 @@ def render_support():
 {FOOT}"""
 
 
+def render_app_redirect():
+    """portthings.com/app = the link inside every QR code: forwards to the App Store with ct=qr, so the
+    target and tracking can change later without reprinting a single code."""
+    target = store_url("qr") if store_id() else BASE + "/"
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{APP_NAME} on the App Store</title>
+<meta http-equiv="refresh" content="0; url={E(target)}">
+<link rel="canonical" href="{BASE}/">
+<script>location.replace({json.dumps(target)});</script>
+</head><body><p><a href="{E(target)}">Get {APP_NAME} on the App Store</a></p></body></html>
+"""
+
+
+QR_TARGET = BASE + "/app"
+
+
+def qr_codes():
+    """qr/portthings-app.png (1024 px, for print) + the same at web size. Made with macOS's own CoreImage
+    QR generator (no downloads). Regenerated only if missing."""
+    out_dir = os.path.join(SITE, "qr"); os.makedirs(out_dir, exist_ok=True)
+    big = os.path.join(out_dir, "portthings-app-print.png")
+    small = os.path.join(out_dir, "portthings-app.png")
+    if os.path.exists(big) and os.path.exists(small):
+        return
+    swift = os.path.join(SITE, "tools", "make_qr.swift")
+    subprocess.run(["swift", swift, QR_TARGET, big], check=True, capture_output=True)
+    shutil.copyfile(big, small)
+    subprocess.run(["sips", "-Z", "240", small], check=True, capture_output=True)
+
+
 def render_404():
     return head(f"Not found | {APP_NAME}", "This page isn't here.", BASE + "/") + f"""  <h1>That page isn't here.</h1>
   <p>It may be a guide that isn't out yet. <a href="/">See every {APP_NAME} guide</a>.</p>
@@ -487,6 +543,8 @@ def main():
         wr(f"guide/{g['id']}/index.html", render_guide(g, sid))
     wr("404.html", render_404())
     wr("support/index.html", render_support())
+    wr("app/index.html", render_app_redirect())
+    qr_codes()
     today = date.today().isoformat()
     urls = [BASE + "/", BASE + "/support/"] + [f"{BASE}/guide/{g['id']}/" for g in guides]
     wr("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'

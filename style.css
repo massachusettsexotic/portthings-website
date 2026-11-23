@@ -121,3 +121,8 @@ footer .credits { font-size: .78rem; line-height: 1.5; margin: 10px 0 0; max-wid
 .shelf li a { position: relative; }
 .soon { position: absolute; top: 8px; left: 8px; z-index: 1; background: var(--deep); color: #fff; font-size: .72rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
 .soonnote { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--sea); border-radius: 10px; padding: 10px 14px; }
+
+/* 23 Nov 2026: QR for computer visitors (hidden on phones) */
+.qrbox { display: flex; align-items: center; gap: 14px; margin: 8px 0 4px; font-size: .92rem; color: var(--muted); }
+.qrbox img { width: 120px; height: 120px; border-radius: 10px; background: #fff; padding: 6px; border: 1px solid var(--border); }
+@media (max-width: 700px), (hover: none) { .qrbox { display: none; } }
