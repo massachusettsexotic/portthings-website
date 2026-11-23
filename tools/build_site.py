@@ -177,7 +177,10 @@ def art(g, cls="cover"):
 # Live in the app's catalog but not yet buyable on the App Store: no page, no card, until the
 # version that sells it is approved. Alaska ships in Port Things 1.0.1 (submitted Nov 2026) -
 # remove it from this set the day 1.0.1 is live, rerun, push.
-ON_HOLD = {"alaska"}
+ON_HOLD = set()
+# Dan 23 Nov 2026: show it now as "Coming soon" (card label + note on its page) while the app version
+# that sells it is in review. Empty this set the day 1.0.1 is live, rerun, push.
+COMING_SOON = {"alaska"}
 
 
 def build_model():
@@ -258,7 +261,8 @@ def azkey(t):
 
 def card(g):
     where = g["country"]
-    return (f'    <li><a href="/guide/{g["id"]}/">{art(g)}<h3>{E(g["name"])}</h3>'
+    soon = '<span class="soon">Coming soon</span>' if g["id"] in COMING_SOON else ""
+    return (f'    <li><a href="/guide/{g["id"]}/">{soon}{art(g)}<h3>{E(g["name"])}</h3>'
             f'<span class="where">{E(where)}</span></a></li>')
 
 
@@ -378,6 +382,8 @@ def render_guide(g, sid):
     cats = "\n".join(f"    <li>{E(c)}</li>" for c in g["categories"])
     packs = (f'<p>Also in the <b>{E(" and ".join(g["regions"]))}</b> pack, and in All guides.</p>'
              if g["regions"] else "<p>Get it on its own, or with All guides.</p>")
+    soon_note = ('  <p class="soonnote"><b>Coming soon.</b> The ' + E(g["name"]) + ' guide arrives in the next'
+                 ' Port Things update, now with Apple for review.</p>\n' if g["id"] in COMING_SOON else "")
     port_line = (" Every place shows walking minutes from your pier, and the day plans are timed around"
                  " the all-aboard." if is_cruise and g["piers"] else "")
     return head(f"{g['name']} guide | {APP_NAME}", desc, url, image) + f"""  <p class="crumbs"><a href="/">← All {APP_NAME} guides</a></p>
@@ -390,9 +396,9 @@ def render_guide(g, sid):
     </div>
   </div>
 
-  <p>A deep, offline guide to {E(g['name'])}, inside the {APP_NAME} app.{port_line}
-  Every place, description and day plan is on the phone, so it works with no signal. Only the map background
-  needs one.</p>
+{soon_note}  <p>A deep, offline guide to {E(g['name'])}, inside the {APP_NAME} app.{port_line}
+  Every place, description and day plan is on the phone, so it works with no signal. Save the port in Apple
+  Maps once and the map and directions work offline too.</p>
 
   <ul class="facts">
     {chr(10).join('    ' + f for f in facts).strip()}
