@@ -65,6 +65,8 @@ SHOTS = [
     ("12-place", "place", "Walking minutes from your pier"),
     ("05-owned-guide-map", "map", "Every place on the map"),
     ("06b-apple-maps-howto", "directions", "Offline directions: save your port in Apple Maps"),
+    ("real-phone/juneau-offline-no-internet", "offline-route", "No internet in Juneau: turn-by-turn from the pier still works"),
+    ("real-phone/juneau-offline-maps-turn", "offline-maps", "Apple Maps using the saved offline map"),
     ("07-offline-apple-maps-buttons", "offline", "Offline packs for every part of the port"),
     ("06-owned-stthomas", "st-thomas", "One app, every port: St. Thomas"),
 ]
@@ -75,6 +77,8 @@ def shots():
     out = []
     for src, name, caption in SHOTS:
         f = os.path.join(SHOT_SRC, f"{src}-iPhone17ProMax.png")
+        if not os.path.exists(f):                       # real-phone shots (Dan's iPhone, 23 Nov 2026)
+            f = os.path.join(SHOT_SRC, f"{src}-iPhone.png")
         if not os.path.exists(f):
             continue
         dst = os.path.join(SITE, "shots", f"{name}.jpg")
