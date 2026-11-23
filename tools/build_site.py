@@ -119,8 +119,9 @@ def provider_token():
 def store_url(ct):
     """App Store link for one traffic source (ct = campaign: web, web-guide, qr)."""
     sid, pt = store_id(), provider_token()
-    url = f"https://apps.apple.com/app/id{sid}"
-    return url + (f"?pt={pt}&ct={ct}&mt=8" if pt else "")
+    if pt:   # Apple's campaign-link format (ASC > Analytics > Campaigns > +)
+        return f"https://apps.apple.com/app/apple-store/id{sid}?pt={pt}&ct={ct}&mt=8"
+    return f"https://apps.apple.com/app/id{sid}"
 
 
 def badge(sid, ct="web"):
