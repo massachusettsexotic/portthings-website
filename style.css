@@ -126,3 +126,11 @@ footer .credits { font-size: .78rem; line-height: 1.5; margin: 10px 0 0; max-wid
 .qrbox { display: flex; align-items: center; gap: 14px; margin: 8px 0 4px; font-size: .92rem; color: var(--muted); }
 .qrbox img { width: 120px; height: 120px; border-radius: 10px; background: #fff; padding: 6px; border: 1px solid var(--border); }
 @media (max-width: 700px), (hover: none) { .qrbox { display: none; } }
+
+/* 23 Nov 2026: free "Arrival day: the essentials" on guide pages */
+.arrival { list-style: none; padding: 0; margin: 12px 0 6px; display: grid; gap: 10px; }
+.arrival li { display: flex; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.arrival .n { flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--sea); color: #fff; font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center; }
+.arrival h3 { margin: 2px 0 4px; font-size: 1rem; }
+.arrival p { margin: 0; font-size: .93rem; line-height: 1.45; }
+.arrival-more { font-weight: 600; color: var(--sea); }

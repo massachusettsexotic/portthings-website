@@ -68,6 +68,9 @@ SHOTS = [
     ("real-phone/juneau-offline-no-internet", "offline-route", "No internet in Juneau: turn-by-turn from the pier still works"),
     ("real-phone/juneau-offline-walking", "offline-walking", "Walking directions from the pier, offline: 26 min to the whale-watch dock"),
     ("07-offline-apple-maps-buttons", "offline", "Offline packs for every part of the port"),
+    # Dan 23 Nov 2026: website only (operators' own preview photos, credited) - NOT for the App Store set.
+    ("real-phone/juneau-book-tour-temsco", "book-tour-temsco", "Book tours direct with local operators: TEMSCO Helicopters, Juneau (photo: temscoair.com)"),
+    ("real-phone/juneau-book-tour-coastal", "book-tour-coastal", "No middleman: Book This Tour goes straight to Coastal Helicopters (photo: coastalhelicopters.com)"),
     ("06-owned-stthomas", "st-thomas", "One app, every port: St. Thomas"),
 ]
 
@@ -246,6 +249,10 @@ def build_model():
             languages=pack["languages"], areas=[a["label"] for a in pack["areas"]],
             categories=[x["label"] for x in pack["categories"]],
             pierList=piers, trips=trips, hasCover=has_cover, coverSrc=cover_src,
+            # Free on the site (Dan 23 Nov 2026): the first ARRIVAL_FREE "Arrival day" tips, English.
+            arrivalIntro=en("arrival.intro"),
+            arrival=[(en(a["title"]), en(a["body"])) for a in sorted(pack.get("arrival") or [], key=lambda a: a.get("number", 0))
+                     if en(a["title"]) and en(a["body"])],
             source=man[gid]["source"]))
     by = {g["id"]: g for g in guides}
     regions = []
@@ -375,6 +382,28 @@ def render_home(guides, regions, sid):
 {FOOT}"""
 
 
+ARRIVAL_FREE = 5
+
+
+def arrival_section(g):
+    tips = g.get("arrival") or []
+    if not tips:
+        return ""
+    shown, more = tips[:ARRIVAL_FREE], len(tips) - ARRIVAL_FREE
+    cards = "\n".join(f'    <li><span class="n">{i}</span><div><h3>{E(t)}</h3><p>{E(b)}</p></div></li>'
+                      for i, (t, b) in enumerate(shown, 1))
+    more_line = (f'{more} more arrival tips, plus every place, ready-made days and offline walking directions, '
+                 if more > 0 else "Every place, ready-made days and offline walking directions, ")
+    intro = f'\n  <p class="small">{E(g["arrivalIntro"])}</p>' if g.get("arrivalIntro") else ""
+    return f"""
+  <h2 id="arrival">Arrival day: the essentials</h2>{intro}
+  <ol class="arrival">
+{cards}
+  </ol>
+  <p class="arrival-more">{more_line}in the {APP_NAME} app.</p>
+"""
+
+
 def render_guide(g, sid):
     url = f"{BASE}/guide/{g['id']}/"
     langs = [LANG.get(l, l) for l in g["languages"]]
@@ -428,7 +457,7 @@ def render_guide(g, sid):
     {chr(10).join('    ' + f for f in facts).strip()}
   </ul>
 {piers}
-
+{arrival_section(g)}
   <h2>Ready-made days</h2>
   <ul class="trips">
 {trips}
