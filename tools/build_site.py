@@ -137,6 +137,12 @@ def art(g, cls="cover"):
 
 
 # ------------------------------------------------------------------------------------------ model
+# Live in the app's catalog but not yet buyable on the App Store: no page, no card, until the
+# version that sells it is approved. Alaska ships in Port Things 1.0.1 (submitted Nov 2026) -
+# remove it from this set the day 1.0.1 is live, rerun, push.
+ON_HOLD = {"alaska"}
+
+
 def build_model():
     global INCLUDED
     cat = load(os.path.join(HUB, "Catalog", "catalog.json"))
@@ -144,7 +150,7 @@ def build_model():
     man = load(os.path.join(HUB, "Packs", "manifest.json"))
     guides = []
     for c in cat["guides"]:
-        if c.get("status") != "live":
+        if c.get("status") != "live" or c["id"] in ON_HOLD:
             continue
         gid = c["id"]
         pack = load(os.path.join(HUB, "Packs", f"{gid}.json"))
@@ -187,6 +193,10 @@ def build_model():
             regions.append(dict(id=r["id"], name=r["name"], guides=live))
     for g in guides:
         g["regions"] = [r["name"] for r in regions if g in r["guides"]]
+        # Home grouping (Dan 23 Nov 2026, same rule as the app): the first catalog region listing the
+        # guide, whether or not packs are sold; a guide in no region is its own heading (Alaska).
+        home = next((r for r in cat["regions"] if g["id"] in r["guides"]), None)
+        g["area"] = home["name"] if home else g["name"]
     return guides, regions
 
 
@@ -203,6 +213,12 @@ def covers(guides):
 
 
 # ------------------------------------------------------------------------------------------ pages
+def azkey(t):
+    """A-Z ignoring case and accents (Roatán sorts with the Rs), like the app."""
+    import unicodedata
+    return "".join(ch for ch in unicodedata.normalize("NFKD", t) if not unicodedata.combining(ch)).casefold()
+
+
 def card(g):
     where = g["country"]
     return (f'    <li><a href="/guide/{g["id"]}/">{art(g)}<h3>{E(g["name"])}</h3>'
@@ -215,15 +231,25 @@ def render_home(guides, regions, sid):
     pack_li = ("\n    <li>or a <b>cruise-region pack</b> that covers every port in that part of the world,</li>" if regions else "")
     shelves = []
     for sh in ("cruise", "trips"):
-        gs = [g for g in guides if sh in g["shelves"]]
+        # Same order as the app's Home: cruise ports by region A-Z, ports A-Z inside; Trips A-Z.
+        gs = sorted((g for g in guides if sh in g["shelves"]), key=lambda g: azkey(g["name"]))
         if not gs:
             continue
-        shelves.append(f"""
-  <h2 id="{sh}">{SHELF[sh]['title']}</h2>
-  <p class="small">{E(SHELF[sh]['sub'])}</p>
+        if sh == "cruise":
+            areas = sorted({g["area"] for g in gs}, key=azkey)
+            body = "".join(f"""
+  <h3 class="area">{E(a)}</h3>
+  <ul class="shelf">
+{chr(10).join(card(g) for g in gs if g["area"] == a)}
+  </ul>""" for a in areas)
+        else:
+            body = f"""
   <ul class="shelf">
 {chr(10).join(card(g) for g in gs)}
-  </ul>""")
+  </ul>"""
+        shelves.append(f"""
+  <h2 id="{sh}">{SHELF[sh]['title']}</h2>
+  <p class="small">{E(SHELF[sh]['sub'])}</p>{body}""")
     packs = "\n".join(
         f'    <li><b>{E(r["name"])}</b><br><span>{E(", ".join(g["name"] for g in r["guides"]))}</span></li>'
         for r in regions)

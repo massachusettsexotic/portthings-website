@@ -65,6 +65,7 @@ img { max-width: 100%; }
   background: linear-gradient(var(--sea), var(--deep)); color: #fff;
   font-weight: 800; font-size: 1.05rem; line-height: 1.2;
 }
+.area { margin: 1.4em 0 0; font-size: 1.05rem; color: var(--accent, #1d5f8a); }
 .shelf h3 { margin: 8px 2px 0; font-size: .98rem; line-height: 1.25; }
 .shelf .where { display: block; margin: 0 2px; color: var(--muted); font-size: .82rem; line-height: 1.3; }
 
